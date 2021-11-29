@@ -37,12 +37,17 @@ public class UserController {
             return ResponseEntity.badRequest().body(errorMessage);
         }
         userService.addUserRest(model);
-        return new ResponseEntity(Map.of("User created",model),HttpStatus.CREATED);
+        return new ResponseEntity(Map.of("User created", model), HttpStatus.CREATED);
     }
 
     @LogRequest
     @PutMapping("/update/{id}")
-    public ResponseEntity updateUser(@RequestBody UserModel model, @PathVariable int id) {
+    public ResponseEntity updateUser(@PathVariable int id, @RequestBody @Valid UserModel model, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.joining(","));
+            List<String> errorsMessage = bindingResult.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
         return ResponseEntity.ok(userService.updateUserRest(id, model));
     }
 

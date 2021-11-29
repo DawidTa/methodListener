@@ -26,13 +26,13 @@ public class UserService {
     public UserEntity updateUserRest(int id, UserModel model) {
         return userRepository.findById(id)
                 .map(userEntity -> {
-                            userEntity.setName(model.getName())
-                                    .setLastname(model.getLastname())
-                                    .setEmail(model.getEmail())
-                                    .setLogin(model.getLogin())
-                                    .setPassword(model.getPassword());
-                            return userRepository.save(userEntity);
-                        })
+                    userEntity.setName(model.getName())
+                            .setLastname(model.getLastname())
+                            .setEmail(model.getEmail())
+                            .setLogin(model.getLogin())
+                            .setPassword(model.getPassword());
+                    return userRepository.save(userEntity);
+                })
                 .orElseGet(() -> userRepository.save(new UserEntity()));
     }
 

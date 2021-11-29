@@ -12,13 +12,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import pl.kurs.testdt5.entity.LogRequestEntity;
 import pl.kurs.testdt5.entity.UserEntity;
+import pl.kurs.testdt5.model.UserModel;
 import pl.kurs.testdt5.service.UserService;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -68,7 +69,18 @@ class UserControllerTest {
 
     @Test
     void updateUser() throws Exception {
+        UserEntity user = new UserEntity(1,"Dawid","Taczkowski","test@test.pl", "testlogin", "test123!");
+        UserModel userModel = new UserModel("Dave","Taczkowski","test@test.pl", "testl", "test123!");
+        user.setName(userModel.getName());
+        userModel.setLogin(userModel.getLogin());
 
+
+        when(userServiceMock.updateUserRest(1,userModel)).thenReturn(user);
+
+        mockMvc.perform(put("/user/update", 1)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("{\"id\":1,\"name\":\"Dave\",\"lastname\":\"Taczkowski\",\"email\":\"test@test.pl\",\"login\":\"testl\",\"password\":\"Test123!\"}"));
     }
 
     @Test

@@ -63,7 +63,7 @@ public class LogRequestAspect {
                 .setTime(end)
                 .setResponseCode(((ResponseEntity) proceed).getStatusCode().toString())
                 .setResponseBody((Objects.requireNonNull(((ResponseEntity) proceed).getBody())).toString())
-                //.setAttributes(Arrays.toString(joinPoint.getArgs()))
+                .setAttributes(Arrays.toString(joinPoint.getArgs()))
                 .setHeaders(headers.toString());
 
         eventPublisher.publishEvent(logRequest);
