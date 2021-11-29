@@ -7,4 +7,7 @@ import pl.kurs.testdt5.entity.UserEntity;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
+    boolean existsByLogin(String login);
+
+    boolean existsByEmail(String email);
 }

@@ -1,6 +1,7 @@
 package pl.kurs.testdt5.service;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import pl.kurs.testdt5.entity.UserEntity;
 import pl.kurs.testdt5.model.UserModel;
@@ -12,30 +13,26 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserEntity getUserRest(int id) {
+    public UserEntity getUserRest(Integer id) {
         return userRepository.findById(id).orElse(null);
     }
 
     public void addUserRest(UserModel model) {
-        UserEntity user = new UserEntity()
-                .setName(model.getName())
-                .setLastname(model.getLastname())
-                .setEmail(model.getEmail())
-                .setLogin(model.getLogin())
-                .setPassword(model.getPassword());
-        userRepository.save(user);
+        ModelMapper modelMapper = new ModelMapper();
+        UserEntity map = modelMapper.map(model, UserEntity.class);
+        userRepository.save(map);
     }
 
     public UserEntity updateUserRest(int id, UserModel model) {
         return userRepository.findById(id)
                 .map(userEntity -> {
-                    userEntity.setName(model.getName())
-                            .setLastname(model.getLastname())
-                            .setEmail(model.getEmail())
-                            .setLogin(model.getLogin())
-                            .setPassword(model.getPassword());
-                    return userRepository.save(userEntity);
-                })
+                            userEntity.setName(model.getName())
+                                    .setLastname(model.getLastname())
+                                    .setEmail(model.getEmail())
+                                    .setLogin(model.getLogin())
+                                    .setPassword(model.getPassword());
+                            return userRepository.save(userEntity);
+                        })
                 .orElseGet(() -> userRepository.save(new UserEntity()));
     }
 

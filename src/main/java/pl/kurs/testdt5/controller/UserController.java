@@ -1,13 +1,19 @@
 package pl.kurs.testdt5.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import pl.kurs.testdt5.aop.LogRequest;
 import pl.kurs.testdt5.model.UserModel;
 import pl.kurs.testdt5.service.UserService;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
@@ -16,22 +22,31 @@ public class UserController {
 
     private final UserService userService;
 
+    @LogRequest
     @GetMapping("/get")
-    public ResponseEntity getUser(@RequestParam(required = false, value = "id") int id) {
+    public ResponseEntity getUser(@RequestParam(required = false, value = "id") Integer id) {
         return ResponseEntity.ok(userService.getUserRest(id));
     }
 
+    @LogRequest
     @PostMapping("/add")
-    public ResponseEntity addUser(@RequestBody @Valid UserModel model) {
+    public ResponseEntity addUser(@RequestBody @Valid UserModel model, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            String errorMessage = bindingResult.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.joining(","));
+            List<String> errorsMessage = bindingResult.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
         userService.addUserRest(model);
-        return new ResponseEntity(HttpStatus.CREATED);
+        return new ResponseEntity(Map.of("User created",model),HttpStatus.CREATED);
     }
 
+    @LogRequest
     @PutMapping("/update/{id}")
     public ResponseEntity updateUser(@RequestBody UserModel model, @PathVariable int id) {
         return ResponseEntity.ok(userService.updateUserRest(id, model));
     }
 
+    @LogRequest
     @DeleteMapping("/delete/{id}")
     public ResponseEntity deleteUser(@PathVariable int id) {
         return ResponseEntity.ok(userService.deleteUserRest(id));
