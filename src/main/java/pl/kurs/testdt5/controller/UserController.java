@@ -1,10 +1,13 @@
 package pl.kurs.testdt5.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import pl.kurs.testdt5.aop.LogRequest;
 import pl.kurs.testdt5.model.UserModel;
@@ -30,12 +33,7 @@ public class UserController {
 
     @LogRequest
     @PostMapping("/add")
-    public ResponseEntity addUser(@RequestBody @Valid UserModel model, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.joining(","));
-            List<String> errorsMessage = bindingResult.getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(errorMessage);
-        }
+    public ResponseEntity addUser(@RequestBody @Valid UserModel model) {
         userService.addUserRest(model);
         return new ResponseEntity(Map.of("User created", model), HttpStatus.CREATED);
     }

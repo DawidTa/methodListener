@@ -1,11 +1,11 @@
 package pl.kurs.testdt5.aop;
 
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,10 +22,10 @@ import java.util.Objects;
 
 @Aspect
 @Service
+@RequiredArgsConstructor
 public class LogRequestAspect {
 
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Pointcut("@annotation(pl.kurs.testdt5.aop.LogRequest)")
     public void addLogRequest() {
