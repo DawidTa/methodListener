@@ -16,6 +16,7 @@ import pl.kurs.testdt5.entity.LogRequestEntity;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Objects;
@@ -33,11 +34,8 @@ public class LogRequestAspect {
 
     @Around("addLogRequest() && args(.., @RequestBody body)")
     public Object addLogRequest(ProceedingJoinPoint joinPoint, Object body) throws Throwable {
-        StringBuilder headers = new StringBuilder();
 
         final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-
-        LogRequestEntity logRequest = new LogRequestEntity();
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
@@ -45,6 +43,15 @@ public class LogRequestAspect {
         long start = System.currentTimeMillis();
         Object proceed = joinPoint.proceed();
         long end = System.currentTimeMillis() - start;
+
+        LogRequestEntity logRequest = setLogRequestEntity(method, end, joinPoint, request, body, proceed);
+
+        eventPublisher.publishEvent(logRequest);
+        return proceed;
+    }
+
+    private String setHeaders(HttpServletRequest request) {
+        StringBuilder headers = new StringBuilder();
 
         if (request != null) {
             Enumeration<String> allHeaders = request.getHeaderNames();
@@ -54,7 +61,15 @@ public class LogRequestAspect {
                 headers.append("Name:").append(headerName).append(", Value:").append(headerValue).append(" ;");
             }
         }
+        return headers.toString();
+    }
 
+    private LogRequestEntity setLogRequestEntity(Method method, long end, ProceedingJoinPoint joinPoint,
+                                                 HttpServletRequest request, Object body, Object proceed) throws UnknownHostException {
+
+        String headers = setHeaders(request);
+
+        LogRequestEntity logRequest = new LogRequestEntity();
         logRequest.setMethod(method.getName())
                 .setIp(InetAddress.getLocalHost().getHostAddress())
                 .setBody(body.toString())
@@ -64,9 +79,8 @@ public class LogRequestAspect {
                 .setResponseCode(((ResponseEntity) proceed).getStatusCode().toString())
                 .setResponseBody((Objects.requireNonNull(((ResponseEntity) proceed).getBody())).toString())
                 .setAttributes(Arrays.toString(joinPoint.getArgs()))
-                .setHeaders(headers.toString());
+                .setHeaders(headers);
 
-        eventPublisher.publishEvent(logRequest);
-        return proceed;
+        return logRequest;
     }
 }

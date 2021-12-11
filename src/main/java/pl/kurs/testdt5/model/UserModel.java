@@ -6,22 +6,16 @@ import lombok.NoArgsConstructor;
 import pl.kurs.testdt5.validation.LoginExist;
 import pl.kurs.testdt5.validation.MailExist;
 
-import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserModel {
-    @NotNull
+public class UserModel{
     private String name;
-    @NotNull
     private String lastname;
-    @NotNull
     @MailExist
     private String email;
-    @NotNull
     @LoginExist
     private String login;
-    @NotNull
     private String password;
 }

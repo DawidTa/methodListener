@@ -22,4 +22,12 @@ public class UserEntity {
     private String email;
     private String login;
     private String password;
+
+    public UserEntity(String name, String lastname, String email, String login, String password) {
+        this.name = name;
+        this.lastname = lastname;
+        this.email = email;
+        this.login = login;
+        this.password = password;
+    }
 }

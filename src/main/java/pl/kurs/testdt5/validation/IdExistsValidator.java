@@ -7,12 +7,12 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 @RequiredArgsConstructor
-public class LoginExistValidator implements ConstraintValidator<LoginExist, String> {
+public class IdExistsValidator implements ConstraintValidator<IdExists, Integer> {
 
     private final UserRepository userRepository;
 
     @Override
-    public boolean isValid(String login, ConstraintValidatorContext constraintValidatorContext) {
-        return !userRepository.existsByLogin(login);
+    public boolean isValid(Integer id, ConstraintValidatorContext constraintValidatorContext) {
+        return userRepository.existsById(id);
     }
 }
