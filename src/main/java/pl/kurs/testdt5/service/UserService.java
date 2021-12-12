@@ -18,10 +18,11 @@ public class UserService {
         return userRepository.findById(userModelGet.getId()).orElse(null);
     }
 
-    public void addUserRest(UserModel model) {
+    public UserEntity addUserRest(UserModel model) {
         ModelMapper modelMapper = new ModelMapper();
         UserEntity map = modelMapper.map(model, UserEntity.class);
         userRepository.save(map);
+        return map;
     }
 
     public UserEntity updateUserRest(UserModelId model) {

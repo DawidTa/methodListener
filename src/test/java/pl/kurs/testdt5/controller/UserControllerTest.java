@@ -1,30 +1,22 @@
 package pl.kurs.testdt5.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.catalina.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import pl.kurs.testdt5.entity.UserEntity;
 import pl.kurs.testdt5.model.UserModel;
 import pl.kurs.testdt5.model.UserModelId;
 import pl.kurs.testdt5.repository.UserRepository;
 import pl.kurs.testdt5.service.UserService;
 
-import java.net.http.HttpClient;
-import java.util.stream.Stream;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,10 +29,10 @@ class UserControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-
-    @MockBean
-    private UserRepository userRepository;
-
+    @Autowired
+    UserController userController;
+    @Autowired
+    UserRepository userRepository;
 
     @MockBean
     private UserEntity userEntity;
@@ -49,7 +41,7 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userEntity = initializeUser();
+        this.userEntity = initializeUser();
     }
 
     @Test
@@ -70,7 +62,7 @@ class UserControllerTest {
 
         String jsonContent = objectMapper.writeValueAsString(userModelId);
 
-        when(userServiceMock.getUserRest(userModelId)).thenReturn(null);
+        //when(userServiceMock.getUserRest(userModelId)).thenReturn(null);
 
         mockMvc.perform(get("/user/get")
                         .accept(MediaType.APPLICATION_JSON)
@@ -83,31 +75,47 @@ class UserControllerTest {
 
     @Test
     void getUser() throws Exception {
-
         UserModelId userModelId = new UserModelId();
-        userModelId.setId(1);
-
+        userModelId.setId(2);
         String jsonContent = objectMapper.writeValueAsString(userModelId);
 
-        when(userServiceMock.getUserRest(userModelId)).thenReturn(userEntity);
+        userEntity = initializeUser();
+
+        when(userServiceMock.getUserRest(any(UserModelId.class))).thenReturn(userEntity);
 
         mockMvc.perform(get("/user/get")
-                        .content(jsonContent)
                         .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonContent))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.name").value("Dawid"))
+                .andExpect(jsonPath("$.lastname").value("Taczkowski"))
+                .andExpect(jsonPath("$.email").value("teasefghjt@test.pl"))
+                .andExpect(jsonPath("$.login").value("tesasdfghjogin"))
+                .andExpect(jsonPath("$.password").value("test123!"));
+    }
+
+    @Test
+    void addUserShouldReturnBadRequest() throws Exception {
+        UserModel user = null;
+        String jsonContent = objectMapper.writeValueAsString(user);
+
+        mockMvc.perform(post("/user/add")
+                        .content(jsonContent)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void addUser() throws Exception {
-        UserEntity user = new UserEntity( "Dawid", "Taczkowski", "test123@test.pl", "testowy123", "test123!");
-        //userRepository.save(user);
-
+        UserModel user = new UserModel("Dawid", "Taczkowski", "test123@test.pl", "testowy123", "test123!");
         String jsonContent = objectMapper.writeValueAsString(user);
 
-//        when(userRepository.save(user)).thenReturn(user);
+        when(userServiceMock.addUserRest(any(UserModel.class))).thenReturn(userEntity);
 
         mockMvc.perform(post("/user/add")
                         .content(jsonContent)
@@ -125,13 +133,9 @@ class UserControllerTest {
 
     @Test
     void updateUser() throws Exception {
-        UserEntity user = new UserEntity(1, "Dawid", "Taczkowski", "test@test.pl", "testlogin", "test123!");
-        UserModel userModel = new UserModel("Dave", "Taczkowski", "test@test.pl", "testl", "test123!");
+        UserModelId userModel = new UserModelId("Dave", "Taczkowski", "testaaa@test.pl", "testl", "test123!", 1);
 
         String jsonContent = objectMapper.writeValueAsString(userModel);
-
-        user.setName(userModel.getName());
-        userModel.setLogin(userModel.getLogin());
 
         mockMvc.perform(put("/user/update")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -144,11 +148,11 @@ class UserControllerTest {
     @Test
     void deleteUser() throws Exception {
         UserModelId userModelId = new UserModelId();
-        userModelId.setId(1);
+        userModelId.setId(2);
 
         String jsonContent = objectMapper.writeValueAsString(userModelId);
 
-        mockMvc.perform(delete("/user/delete/")
+        mockMvc.perform(delete("/user/delete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(jsonContent))
@@ -157,6 +161,6 @@ class UserControllerTest {
     }
 
     private UserEntity initializeUser() {
-        return new UserEntity(1, "Dawid", "Taczkowski", "teasefghjt@test.pl", "tesasdfghjogin", "test123!");
+        return new UserEntity(2, "Dawid", "Taczkowski", "teasefghjt@test.pl", "tesasdfghjogin", "test123!");
     }
 }

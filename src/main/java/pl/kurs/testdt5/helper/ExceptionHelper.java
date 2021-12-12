@@ -12,7 +12,6 @@ import pl.kurs.testdt5.aop.LogRequest;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ControllerAdvice
 public class ExceptionHelper {

@@ -10,7 +10,7 @@ import pl.kurs.testdt5.validation.MailExist;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserModel{
+public class UserModel {
     private String name;
     private String lastname;
     @MailExist

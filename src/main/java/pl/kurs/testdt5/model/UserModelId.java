@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserModelId extends UserModel{
+public class UserModelId extends UserModel {
     @NotNull
     @IdExists
     private int id;

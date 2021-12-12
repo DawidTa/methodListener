@@ -1,6 +1,7 @@
 package pl.kurs.testdt5.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,8 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
     private final UserRepository userRepository;
 
     @LogRequest
@@ -28,16 +30,16 @@ public class UserController {
 
     @LogRequest
     @PostMapping("/add")
-    public ResponseEntity addUser(@RequestBody @Valid UserModel model){
+    public ResponseEntity addUser(@RequestBody @Valid UserModel model) {
         userService.addUserRest(model);
         return new ResponseEntity(model, HttpStatus.CREATED);
     }
 
-    @LogRequest
-    @PutMapping("/update")
-    public ResponseEntity updateUser(@RequestBody @Valid UserModelId userModelId) {
-        return ResponseEntity.ok(userService.updateUserRest(userModelId));
-    }
+//    @LogRequest
+//    @PutMapping("/update")
+//    public ResponseEntity updateUser(@RequestBody @Valid UserModelId userModelId) {
+//        return ResponseEntity.ok(userService.updateUserRest(userModelId));
+//    }
 
     @LogRequest
     @DeleteMapping("/delete")
