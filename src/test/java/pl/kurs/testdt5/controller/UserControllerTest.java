@@ -1,6 +1,7 @@
 package pl.kurs.testdt5.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@RequiredArgsConstructor
 class UserControllerTest {
 
     @Autowired
@@ -30,9 +32,9 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    UserController userController;
+    private UserController userController;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @MockBean
     private UserEntity userEntity;
