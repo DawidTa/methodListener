@@ -1,30 +1,24 @@
 package pl.kurs.testdt5.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import pl.kurs.testdt5.entity.UserEntity;
 import pl.kurs.testdt5.model.UserModel;
-import pl.kurs.testdt5.model.UserModelId;
 import pl.kurs.testdt5.repository.UserRepository;
-import pl.kurs.testdt5.service.UserService;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@RequiredArgsConstructor
 class UserControllerTest {
 
     @Autowired
@@ -32,18 +26,18 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private UserController userController;
-    @Autowired
     private UserRepository userRepository;
 
-    @MockBean
-    private UserEntity userEntity;
-    @MockBean
-    private UserService userServiceMock;
-
     @BeforeEach
-    void setUp() {
-        this.userEntity = initializeUser();
+    public void initTest() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("1")
+                .setName("Dave")
+                .setLastname("Test")
+                .setEmail("test123@test.pl")
+                .setLogin("testowy123")
+                .setPassword("test123!");
+        userRepository.save(userEntity);
     }
 
     @Test
@@ -51,118 +45,84 @@ class UserControllerTest {
         mockMvc.perform(get("/")).andDo(print()).andExpect(status().isNotFound());
     }
 
-    @Test
-    public void ensureThatJsonIsReturned() {
-
-    }
 
     @Test
     public void givenIdDoesNotExist() throws Exception {
 
-        UserModelId userModelId = new UserModelId();
-        userModelId.setId(15);
-
-        String jsonContent = objectMapper.writeValueAsString(userModelId);
-
-        //when(userServiceMock.getUserRest(userModelId)).thenReturn(null);
-
-        mockMvc.perform(get("/user/get")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
+        mockMvc.perform(get("/user/{login}", "testowylogin"))
                 .andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void getUser() throws Exception {
-        UserModelId userModelId = new UserModelId();
-        userModelId.setId(2);
-        String jsonContent = objectMapper.writeValueAsString(userModelId);
+    public void getUser() throws Exception {
 
-        userEntity = initializeUser();
-
-        when(userServiceMock.getUserRest(any(UserModelId.class))).thenReturn(userEntity);
-
-        mockMvc.perform(get("/user/get")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
+        mockMvc.perform(get("/user/{login}", "testowy123"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name").value("Dawid"))
-                .andExpect(jsonPath("$.lastname").value("Taczkowski"))
-                .andExpect(jsonPath("$.email").value("teasefghjt@test.pl"))
-                .andExpect(jsonPath("$.login").value("tesasdfghjogin"))
-                .andExpect(jsonPath("$.password").value("test123!"));
-    }
-
-    @Test
-    void addUserShouldReturnBadRequest() throws Exception {
-        UserModel user = null;
-        String jsonContent = objectMapper.writeValueAsString(user);
-
-        mockMvc.perform(post("/user/add")
-                        .content(jsonContent)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void addUser() throws Exception {
-        UserModel user = new UserModel("Dawid", "Taczkowski", "test123@test.pl", "testowy123", "test123!");
-        String jsonContent = objectMapper.writeValueAsString(user);
-
-        when(userServiceMock.addUserRest(any(UserModel.class))).thenReturn(userEntity);
-
-        mockMvc.perform(post("/user/add")
-                        .content(jsonContent)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.name").value("Dawid"))
-                .andExpect(jsonPath("$.lastname").value("Taczkowski"))
+                .andExpect(jsonPath("$.name").value("Dave"))
+                .andExpect(jsonPath("$.lastname").value("Test"))
                 .andExpect(jsonPath("$.email").value("test123@test.pl"))
                 .andExpect(jsonPath("$.login").value("testowy123"))
                 .andExpect(jsonPath("$.password").value("test123!"));
     }
 
     @Test
-    void updateUser() throws Exception {
-        UserModelId userModel = new UserModelId("Dave", "Taczkowski", "testaaa@test.pl", "testl", "test123!", 1);
+    public void addUserShouldReturnBadRequest() throws Exception {
 
-        String jsonContent = objectMapper.writeValueAsString(userModel);
-
-        mockMvc.perform(put("/user/update")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
-                .andExpect(status().isOk())
-                .andExpect(content().string(jsonContent));
+        mockMvc.perform(post("/user"))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void deleteUser() throws Exception {
-        UserModelId userModelId = new UserModelId();
-        userModelId.setId(2);
+    public void addUser() throws Exception {
+        UserModel user = new UserModel("Dawid", "Taczkowski", "test@test.pl", "testowy", "test123!");
+        String jsonContent = objectMapper.writeValueAsString(user);
 
-        String jsonContent = objectMapper.writeValueAsString(userModelId);
+        MvcResult result = mockMvc.perform(post("/user")
+                        .content(jsonContent)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isString())
+                .andExpect(jsonPath("$.name").value("Dawid"))
+                .andExpect(jsonPath("$.lastname").value("Taczkowski"))
+                .andExpect(jsonPath("$.email").value("test@test.pl"))
+                .andExpect(jsonPath("$.login").value("testowy"))
+                .andExpect(jsonPath("$.password").value("test123!")).andReturn();
 
-        mockMvc.perform(delete("/user/delete")
+        System.out.println(result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void updateUser() throws Exception {
+
+        UserModel userModel = new UserModel("Test123", "test123", "testaaa123@test.pl", "testl123", "test123!");
+
+        String jsonContent = objectMapper.writeValueAsString(userModel);
+
+        mockMvc.perform(put("/user/{login}", "testowy123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(jsonContent))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Test123"))
+                .andExpect(jsonPath("$.lastname").value("test123"))
+                .andExpect(jsonPath("$.email").value("testaaa123@test.pl"))
+                .andExpect(jsonPath("$.login").value("testl123"))
+                .andExpect(jsonPath("$.password").value("test123!"));
     }
 
-    private UserEntity initializeUser() {
-        return new UserEntity(2, "Dawid", "Taczkowski", "teasefghjt@test.pl", "tesasdfghjogin", "test123!");
+    @Test
+    public void deleteUser() throws Exception {
+
+        mockMvc.perform(delete("/user/{login}", "testowy123"))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 }

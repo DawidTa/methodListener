@@ -1,5 +1,6 @@
 package pl.kurs.testdt5.helper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class ExceptionHelper {
+
+    private final ExceptionService exceptionService;
 
     @LogRequest
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
@@ -35,20 +39,28 @@ public class ExceptionHelper {
     @LogRequest
     @ExceptionHandler(value = {HttpMessageNotReadableException.class})
     public ResponseEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        String message = ex.getMessage();
-        return new ResponseEntity<>("Required request body is missing", HttpStatus.BAD_REQUEST);
+        ExceptionModel model = exceptionService.setExceptionResponse(ex, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(model, HttpStatus.BAD_REQUEST);
     }
 
     @LogRequest
     @ExceptionHandler(value = {NullPointerException.class})
     public ResponseEntity handleNullPointerException(NullPointerException ex) {
-        return new ResponseEntity("Check your data", HttpStatus.BAD_REQUEST);
+        ExceptionModel model = exceptionService.setExceptionResponse(ex, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(model, HttpStatus.BAD_REQUEST);
     }
 
     @LogRequest
     @ExceptionHandler(value = {EmptyResultDataAccessException.class})
     public ResponseEntity handleEmptyResultDataAccessException(EmptyResultDataAccessException ex) {
-        String message = ex.getMessage();
-        return new ResponseEntity(message, HttpStatus.BAD_REQUEST);
+        ExceptionModel model = exceptionService.setExceptionResponse(ex, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(model, HttpStatus.BAD_REQUEST);
+    }
+
+    @LogRequest
+    @ExceptionHandler(value = {UserNotFoundException.class})
+    public ResponseEntity handleUserNotFoundException(UserNotFoundException ex) {
+        ExceptionModel model = exceptionService.setExceptionResponse(ex, HttpStatus.NOT_FOUND);
+        return new ResponseEntity(model, HttpStatus.NOT_FOUND);
     }
 }

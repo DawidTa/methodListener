@@ -14,6 +14,6 @@ public class LogRequestListener {
 
     @EventListener(LogRequestEntity.class)
     public void saveToDb(LogRequestEntity logRequestEntity) {
-        logRequestRepository.saveAndFlush(logRequestEntity);
+        logRequestRepository.save(logRequestEntity);
     }
 }
