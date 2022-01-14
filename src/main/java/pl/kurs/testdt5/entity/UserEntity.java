@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -25,7 +26,10 @@ public class UserEntity {
     private String id;
     private String name;
     private String lastname;
+    @NotNull
     private String email;
+    @NotNull
     private String login;
+    @NotNull
     private String password;
 }

@@ -31,7 +31,9 @@ public class LogRequestEntity {
     private String attributes;
     private String cookies;
     private String responseCode;
+    @Lob
     private String responseBody;
+    @Lob
     private String headers;
 
 }
